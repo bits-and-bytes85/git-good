@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Good: Learn Git fast!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .story-panel {
+            flex: 1;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 2px solid #4a9eff;
+            overflow-y: auto;
+        }
+
+        .terminal-panel {
+            flex: 1;
+            padding: 20px;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #4a9eff;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            color: #4a9eff;
+            text-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .episode-info {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4a9eff;
+            margin-bottom: 20px;
+        }
+
+        .episode-title {
+            font-size: 1.5rem;
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+
+        .story-content {
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .mission-objective {
+            background: rgba(255, 193, 7, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .objective-title {
+            color: #ffc107;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .file-status {
+            background: rgba(40, 167, 69, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+
+        .terminal {
+            background: #161b22;
+            border-radius: 10px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #30363d;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            min-height: 200px;
+        }
+
+        .output-line {
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .prompt {
+            color: #58a6ff;
+        }
+
+        .success {
+            color: #3fb950;
+        }
+
+        .error {
+            color: #f85149;
+        }
+
+        .info {
+            color: #79c0ff;
+        }
+
+        .warning {
+            color: #f0883e;
+        }
+
+        .terminal-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .terminal-prompt {
+            color: #58a6ff;
+            margin-right: 10px;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9eff, #58a6ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .hint-button, .next-button {
+            background: linear-gradient(135deg, #4a9eff, #58a6ff);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .hint-button:hover, .next-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.3);
+        }
+
+        .hint-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .repo-status {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .file-item {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-status-icon {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .untracked { color: #f85149; }
+        .modified { color: #f0883e; }
+        .staged { color: #3fb950; }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 5px currentColor; }
+            50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+
+        .nano-editor {
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+        }
+
+        .nano-header {
+            color: #ffffff;
+            background: #333;
+            padding: 5px 10px;
+            margin: -15px -15px 10px -15px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nano-content {
+            white-space: pre-wrap;
+            min-height: 200px;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .nano-footer {
+            color: #ffffff;
+            background: #333;
+            padding: 5px 10px;
+            margin: 10px -15px -15px -15px;
+            border-radius: 0 0 8px 8px;
+            font-size: 0.9rem;
+        }
+
+        .branch-indicator {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 2px solid #8a2be2;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .branch-name {
+            color: #8a2be2;
+            font-size: 1.2rem;
+        }
+
+        .conflict-marker {
+            background: rgba(255, 69, 58, 0.1);
+            border-left: 4px solid #ff453a;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="story-panel">
+            <div class="game-header">
+                <h1 class="game-title">Git Good</h1>
+                <p>Learn Git fast!</p>
+            </div>
+
+            <div class="episode-info">
+                <h2 class="episode-title" id="episode-title">Episode 1: The Mysterious Bug</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="story-content" id="story-content">
+                <p>Welcome to <strong>MacroHard Inc.</strong>, a bustling startup where you've just been hired as a junior developer! 🚀</p>
+                <p>It's your first day, and there's already drama in the air. The company's main website has a critical bug that's preventing customers from signing up. The senior developer who was supposed to fix it called in sick, and now it's up to you!</p>
+                <p>Your manager, Sarah, rushes over to your desk with a worried expression...</p>
+                <p><em>"Hey! I know it's your first day, but we really need your help. There's a bug in the signup form that's costing us customers. I've already identified the issue and created a fix, but I need you to properly commit it to our repository. Can you handle that?"</em></p>
+            </div>
+
+            <div class="mission-objective">
+                <div class="objective-title">🎯 Mission Objective:</div>
+                <p id="objective-text">Add the fixed file to staging, commit your changes with a descriptive message, and push to the main branch.</p>
+            </div>
+
+            <div class="file-status">
+                <div class="objective-title">📁 Current Repository Status:</div>
+                <div class="branch-indicator" id="branch-indicator">
+                    <span class="branch-name" id="current-branch">main</span>
+                </div>
+                <div class="repo-status" id="repo-status">
+                    <div class="file-item">
+                        <span class="file-status-icon untracked">??</span>
+                        <span>signup-form.html (untracked - contains the bug fix!)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="nano-editor" class="nano-editor hidden">
+                <div class="nano-header">
+                    <span>GNU nano 7.2</span>
+                    <span id="nano-filename">config.json</span>
+                </div>
+                <textarea class="nano-content" id="nano-content" placeholder="File content will appear here..."></textarea>
+                <div class="nano-footer">
+                    ^X Exit  ^O Write Out  ^W Where Is  ^K Cut Text  ^J Justify
+                </div>
+                <div style="margin-top: 10px; text-align: center;">
+                    <button class="hint-button" onclick="saveNanoFile()">💾 Save & Exit (Ctrl+X)</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="hint-button" id="hint-button" onclick="showHint()">💡 Need a Hint?</button>
+                <button class="next-button hidden" id="next-button" onclick="nextEpisode()">🚀 Next Episode</button>
+            </div>
+
+            <div id="hint-content" class="hidden" style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #ffc107;">
+                <p><strong>💡 Hint:</strong> Remember the basic Git workflow:</p>
+                <ol>
+                    <li><code>git add [filename]</code> - Stage your changes</li>
+                    <li><code>git commit -m "message"</code> - Commit with a descriptive message</li>
+                    <li><code>git push</code> - Push to the remote repository</li>
+                </ol>
+                <p>The file you need to add is <code>signup-form.html</code></p>
+            </div>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <div class="terminal-title">Terminal - ~/MacroHard-website</div>
+                </div>
+
+                <div class="terminal-output" id="terminal-output">
+                    <div class="output-line info">Welcome to the GitGood Terminal! 🎮</div>
+                    <div class="output-line">You are in the MacroHard website repository.</div>
+                    <div class="output-line">Type Git commands to complete your mission!</div>
+                    <div class="output-line">💡 Type "help" for a complete command reference</div>
+                    <div class="output-line">&nbsp;</div>
+                </div>
+
+                <div class="terminal-input">
+                    <span class="terminal-prompt">git-quest:~/MacroHard-website$</span>
+                    <input type="text" class="command-input" id="command-input" placeholder="Type your git command here..." onkeypress="handleCommand(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let currentEpisode = 1;
+        let gameState = {
+            stagedFiles: [],
+            committedFiles: [],
+            pushedFiles: [],
+            currentStep: 0,
+            hintUsed: false,
+            currentBranch: 'main',
+            branches: ['main'],
+            fileContents: {},
+            inNano: false,
+            nanoFile: '',
+            nanoContent: '',
+            mergeInProgress: false,
+            completedEpisodes: []
+        };
+
+        // Episode data
+        const episodes = {
+            1: {
+                title: "Episode 1: The Mysterious Bug",
+                objective: "Add the fixed file to staging, commit your changes with a descriptive message, and push to the main branch.",
+                steps: ['add', 'commit', 'push'],
+                files: ['signup-form.html'],
+                story: '<p>Welcome to <strong>MacroHard Inc.</strong>, a bustling startup where you\'ve just been hired as a junior developer! 🚀</p><p>It\'s your first day, and there\'s already drama in the air. The company\'s main website has a critical bug that\'s preventing customers from signing up. The senior developer who was supposed to fix it called in sick, and now it\'s up to you!</p><p>Your manager, Sarah, rushes over to your desk with a worried expression...</p><p><em>"Hey! I know it\'s your first day, but we really need your help. There\'s a bug in the signup form that\'s costing us customers. I\'ve already identified the issue and created a fix, but I need you to properly commit it to our repository. Can you handle that?"</em></p>'
+            },
+            2: {
+                title: "Episode 2: The Feature Request",
+                objective: "Add multiple files to staging, commit them together, and push your feature to the repository.",
+                steps: ['add', 'commit', 'push'],
+                files: ['navigation.html', 'styles.css', 'script.js'],
+                story: '<p>Great job on fixing that signup bug! Word of your success has spread quickly around <strong>MacroHard Inc.</strong> 🌟</p><p>The next morning, you arrive to find a sticky note on your monitor from the UI/UX team...</p><p><em>"Hey Git Hero! 😄 We\'ve designed a new navigation system for the website. Could you help us get it into the repository? We have three files ready: the HTML structure, CSS styles, and JavaScript functionality. Thanks!"</em></p><p>This time you need to handle multiple files at once - a common scenario in real development work!</p>'
+            },
+            3: {
+                title: "Episode 3: The Configuration Crisis",
+                objective: "Use nano to edit the config file, then add, commit, and push your changes.",
+                steps: ['nano', 'add', 'commit', 'push'],
+                files: ['config.json'],
+                story: `
+                    <p>Just as you're settling into your groove at <strong>MacroHard Inc.</strong>, an urgent Slack message pops up from DevOps...</p>
+                    <p><em>"🚨 URGENT: The production server configuration is outdated! We need to update the API endpoint in config.json from 'api-v1.MacroHard.com' to 'api-v2.MacroHard.com'. Can you handle this ASAP?"</em></p>
+                    <p>This time, you'll need to actually edit the file content using the nano text editor before committing your changes. Real developers spend a lot of time editing files directly in the terminal!</p>
+                `,
+                fileContents: {
+                    'config.json': `{
+"app_name": "MacroHard Website",
+"version": "2.1.0",
+"api_endpoint": "api-v1.MacroHard.com",
+"database": {
+"host": "db.MacroHard.com",
+"port": 5432
+},
+"features": {
+"user_registration": true,
+"payment_processing": true,
+"analytics": true
+}
+}`
+                },
+                editTarget: { file: 'config.json', find: 'api-v1.MacroHard.com', replace: 'api-v2.MacroHard.com' }
+            },
+            4: {
+                title: "Episode 4: The Feature Branch",
+                objective: "Create a new branch called 'user-profiles', switch to it, make changes, and push the new branch.",
+                steps: ['branch', 'checkout', 'add', 'commit', 'push'],
+                files: ['user-profile.html', 'profile-styles.css'],
+                story: `
+                    <p>You've proven yourself with the basics! Now Sarah approaches with a bigger challenge...</p>
+                    <p><em>"We're ready to trust you with feature development! We need to build a user profile system, but we can't risk breaking the main branch. Create a new feature branch called 'user-profiles' and build the feature there safely."</em></p>
+                    <p>Welcome to professional Git workflows! Branching lets you work on features without affecting the stable main code.</p>
+                `,
+                currentBranch: 'main'
+            },
+            5: {
+                title: "Episode 5: The Merge Master",
+                objective: "Switch back to main branch and merge your user-profiles branch, then push the updated main branch.",
+                steps: ['checkout', 'merge', 'push'],
+                files: ['user-profile.html', 'profile-styles.css'],
+                story: `
+                    <p>Excellent work on the user profiles feature! The team has tested your branch and everyone loves it. Now it's time for the final step...</p>
+                    <p><em>"Perfect! The user-profiles feature looks great. Now we need to merge it back into the main branch so we can deploy it to production. Can you handle the merge?"</em></p>
+                    <p>This is where the magic happens - combining your feature work with the main codebase!</p>
+                `,
+                prerequisite: 4, // Must complete episode 4 first
+                currentBranch: 'user-profiles'
+            },
+            6: {
+                title: "Episode 6: The Merge Conflict",
+                objective: "Resolve a merge conflict by editing the conflicted file, then complete the merge and push.",
+                steps: ['merge', 'nano', 'add', 'commit', 'push'],
+                files: ['index.html'],
+                story: `
+                    <p>Oh no! While you were working on your feature branch, another developer pushed changes to the main branch that conflict with your work...</p>
+                    <p><em>"Don't panic! This is totally normal in collaborative development. You'll need to resolve the merge conflict manually. Open the conflicted file, choose which changes to keep, then complete the merge."</em></p>
+                    <p>Merge conflicts happen when Git can't automatically combine changes. It's a rite of passage for every developer!</p>
+                `,
+                currentBranch: 'feature-updates',
+                hasConflict: true,
+                conflictFile: 'index.html',
+                conflictContent: 'HTML file with merge conflict - contains both versions of the content'
+            }
+        };
+
+        function addOutput(text, type = '') {
+            const output = document.getElementById('terminal-output');
+            const line = document.createElement('div');
+            line.className = 'output-line ' + type;
+            line.innerHTML = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateProgress() {
+            const totalSteps = episodes[currentEpisode].steps.length;
+            const progress = (gameState.currentStep / totalSteps) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+        }
+
+        function updateRepoStatus() {
+            const statusDiv = document.getElementById('repo-status');
+            const files = episodes[currentEpisode].files;
+            
+            let statusHTML = '';
+            files.forEach(file => {
+                let status = 'untracked';
+                let icon = '??';
+                let description = '(untracked)';
+                
+                if (gameState.stagedFiles.includes(file)) {
+                    status = 'staged';
+                    icon = 'A';
+                    description = '(staged for commit)';
+                }
+                if (gameState.committedFiles.includes(file)) {
+                    status = 'staged';
+                    icon = '✓';
+                    description = '(committed)';
+                }
+                if (gameState.pushedFiles.includes(file)) {
+                    status = 'staged';
+                    icon = '🚀';
+                    description = '(pushed to remote)';
+                }
+                
+                statusHTML += '<div class="file-item"><span class="file-status-icon ' + status + '">' + icon + '</span><span>' + file + ' ' + description + '</span></div>';
+            });
+            
+            statusDiv.innerHTML = statusHTML;
+        }
+
+        function handleCommand(event) {
+            if (event.key !== 'Enter') return;
+            
+            const input = event.target;
+            const command = input.value.trim();
+            
+            if (!command) return;
+            
+            // Show the command in terminal
+            addOutput('git-quest:~/MacroHard-website$ ' + command, 'prompt');
+            
+            // Process the command
+            processCommand(command);
+            
+            // Clear input
+            input.value = '';
+            
+            // Prevent default form submission
+            event.preventDefault();
+        }
+
+        function processCommand(command) {
+            const parts = command.toLowerCase().split(' ');
+            const mainCommand = parts[0];
+            const subCommand = parts[1];
+            
+            // Handle standalone help command
+            if (mainCommand === 'help') {
+                showGeneralHelp();
+                return;
+            }
+            
+            // Handle nano command
+            if (mainCommand === 'nano') {
+                handleNano(parts);
+                return;
+            }
+            
+            // Handle git commands
+            if (mainCommand !== 'git') {
+                addOutput('bash: ' + command + ': command not found', 'error');
+                addOutput('💡 Available commands: help, git, nano', 'info');
+                addOutput('💡 Type "help" for a complete command reference', 'info');
+                return;
+            }
+            
+            switch (subCommand) {
+                case 'status':
+                    handleGitStatus();
+                    break;
+                case 'add':
+                    handleGitAdd(parts);
+                    break;
+                case 'commit':
+                    handleGitCommit(parts);
+                    break;
+                case 'push':
+                    handleGitPush();
+                    break;
+                case 'branch':
+                    handleGitBranch(parts);
+                    break;
+                case 'checkout':
+                    handleGitCheckout(parts);
+                    break;
+                case 'merge':
+                    handleGitMerge(parts);
+                    break;
+                case 'help':
+                    handleGitHelp();
+                    break;
+                default:
+                    addOutput(`git: '${subCommand}' is not a git command. Try 'git help' for available commands.`, 'error');
+            }
+        }
+
+        function handleGitStatus() {
+            addOutput('On branch main', 'info');
+            addOutput('Your branch is up to date with \'origin/main\'.', 'info');
+            addOutput('');
+            
+            const files = episodes[currentEpisode].files;
+            let hasUntracked = false;
+            let hasStaged = false;
+            
+            files.forEach(file => {
+                if (!gameState.stagedFiles.includes(file) && !gameState.committedFiles.includes(file)) {
+                    if (!hasUntracked) {
+                        addOutput('Untracked files:', 'warning');
+                        addOutput('  (use "git add <file>..." to include in what will be committed)', 'info');
+                        addOutput('');
+                        hasUntracked = true;
+                    }
+                    addOutput(`\t${file}`, 'error');
+                }
+                
+                if (gameState.stagedFiles.includes(file) && !gameState.committedFiles.includes(file)) {
+                    if (!hasStaged) {
+                        addOutput('Changes to be committed:', 'success');
+                        addOutput('  (use "git reset HEAD <file>..." to unstage)', 'info');
+                        addOutput('');
+                        hasStaged = true;
+                    }
+                    addOutput(`\tnew file:   ${file}`, 'success');
+                }
+            });
+            
+            if (!hasUntracked && !hasStaged) {
+                if (gameState.committedFiles.length > 0) {
+                    addOutput('nothing to commit, working tree clean', 'success');
+                }
+            }
+        }
+
+        function handleGitAdd(parts) {
+            if (parts.length < 3) {
+                addOutput('fatal: pathspec is required', 'error');
+                addOutput('💡 Try: git add <filename>', 'info');
+                return;
+            }
+            
+            const filename = parts[2];
+            const episode = episodes[currentEpisode];
+            const files = episode.files;
+            
+            if (!files.includes(filename)) {
+                addOutput(`fatal: pathspec '${filename}' did not match any files`, 'error');
+                addOutput(`💡 Available files: ${files.join(', ')}`, 'info');
+                return;
+            }
+            
+            if (gameState.stagedFiles.includes(filename)) {
+                addOutput(`File '${filename}' is already staged`, 'warning');
+                return;
+            }
+            
+            gameState.stagedFiles.push(filename);
+            addOutput(`✅ Added '${filename}' to staging area`, 'success');
+            
+            // Check if all files are staged for this episode
+            if (gameState.stagedFiles.length === files.length) {
+                if (episode.steps.includes('add') && gameState.currentStep === 2) {
+                    gameState.currentStep = 3;
+                    updateProgress();
+                    addOutput('🎉 Great job! Now commit your changes with a descriptive message.', 'success');
+                    addOutput('💡 Try: git commit -m "Your commit message here"', 'info');
+                } else if (episode.steps.includes('add') && gameState.currentStep === 0) {
+                    gameState.currentStep = 1;
+                    updateProgress();
+                    addOutput('🎉 Great job! Now commit your changes with a descriptive message.', 'success');
+                    addOutput('💡 Try: git commit -m "Your commit message here"', 'info');
+                }
+            }
+            
+            updateRepoStatus();
+        }
+
+        function handleGitCommit(parts) {
+            if (gameState.stagedFiles.length === 0) {
+                addOutput('nothing to commit, working tree clean', 'info');
+                addOutput('💡 You need to stage files first with "git add"', 'info');
+                return;
+            }
+            
+            if (parts.length < 4 || parts[2] !== '-m') {
+                addOutput('Aborting commit due to empty commit message.', 'error');
+                addOutput('💡 Try: git commit -m "your commit message here"', 'info');
+                return;
+            }
+            
+            const message = parts.slice(3).join(' ').replace(/['"]/g, '');
+            
+            if (message.length < 5) {
+                addOutput('Commit message too short. Please provide a descriptive message.', 'error');
+                addOutput('💡 Good commit messages describe what you changed and why', 'info');
+                return;
+            }
+            
+            // Move staged files to committed
+            gameState.committedFiles = [...gameState.stagedFiles];
+            gameState.stagedFiles = [];
+            
+            addOutput(`[${gameState.currentBranch} ${generateCommitHash()}] ${message}`, 'success');
+            addOutput(`${gameState.committedFiles.length} file(s) changed`, 'info');
+            gameState.committedFiles.forEach(file => {
+                addOutput(`create mode 100644 ${file}`, 'info');
+            });
+            
+            const episode = episodes[currentEpisode];
+            if (episode.steps.includes('commit') && (gameState.currentStep === 1 || gameState.currentStep === 3)) {
+                const nextStep = gameState.currentStep === 1 ? 2 : 4;
+                gameState.currentStep = nextStep;
+                updateProgress();
+                addOutput('🎉 Excellent! Your changes are now committed. Time to push to the remote repository.', 'success');
+                addOutput('💡 Try: git push', 'info');
+            } else if (episode.hasConflict && gameState.currentStep === 2) {
+                // Merge conflict resolution commit
+                gameState.currentStep = 3;
+                updateProgress();
+                addOutput('🎉 Merge conflict resolved! Now push to complete the merge.', 'success');
+                addOutput('💡 Try: git push', 'info');
+            }
+            
+            updateRepoStatus();
+        }
+
+        function handleGitPush() {
+            if (gameState.committedFiles.length === 0) {
+                addOutput('Everything up-to-date', 'info');
+                addOutput('💡 You need to commit changes before pushing', 'info');
+                return;
+            }
+            
+            addOutput('Enumerating objects: 3, done.', 'info');
+            addOutput('Counting objects: 100% (3/3), done.', 'info');
+            addOutput('Writing objects: 100% (3/3), 287 bytes | 287.00 KiB/s, done.', 'info');
+            addOutput('Total 3 (delta 0), reused 0 (delta 0), pack-reused 0', 'info');
+            addOutput('To github.com:MacroHard/website.git', 'info');
+            addOutput('   a1b2c3d..e4f5g6h  main -> main', 'success');
+            
+            gameState.pushedFiles = [...gameState.committedFiles];
+            
+            const episode = episodes[currentEpisode];
+            if (episode.steps.includes('push') && (gameState.currentStep === 2 || gameState.currentStep === 4)) {
+                const nextStep = gameState.currentStep === 2 ? 3 : 5;
+                gameState.currentStep = nextStep;
+                updateProgress();
+                completeEpisode();
+            } else if (episode.hasConflict && gameState.currentStep === 3) {
+                // Merge conflict resolution push
+                gameState.currentStep = 4;
+                updateProgress();
+                completeEpisode();
+            }
+            
+            updateRepoStatus();
+        }
+
+        function handleNano(parts) {
+            if (parts.length < 2) {
+                addOutput('usage: nano [filename]', 'error');
+                return;
+            }
+            
+            const filename = parts[1];
+            const episode = episodes[currentEpisode];
+            
+            if (!episode.files.includes(filename) && (!episode.conflictFile || episode.conflictFile !== filename)) {
+                addOutput(`nano: ${filename}: No such file or directory`, 'error');
+                return;
+            }
+            
+            // Open nano editor
+            gameState.inNano = true;
+            gameState.nanoFile = filename;
+            
+            // Load file content
+            if (episode.fileContents && episode.fileContents[filename]) {
+                gameState.nanoContent = episode.fileContents[filename];
+            } else if (episode.conflictFile === filename && episode.conflictContent) {
+                gameState.nanoContent = episode.conflictContent;
+            } else {
+                gameState.nanoContent = `// ${filename}\n// Edit this file to complete the mission!`;
+            }
+            
+            document.getElementById('nano-filename').textContent = filename;
+            document.getElementById('nano-content').value = gameState.nanoContent;
+            document.getElementById('nano-editor').classList.remove('hidden');
+            
+            addOutput(`Opening ${filename} in nano...`, 'info');
+            addOutput('📝 Edit the file content above, then save and exit!', 'success');
+        }
+
+        function saveNanoFile() {
+            if (!gameState.inNano) return;
+            
+            const newContent = document.getElementById('nano-content').value;
+            const episode = episodes[currentEpisode];
+            
+            // Check if the required edit was made (for episode 3)
+            if (episode.editTarget) {
+                const target = episode.editTarget;
+                if (newContent.includes(target.find)) {
+                    addOutput('❌ You still need to update the API endpoint!', 'error');
+                    addOutput(`💡 Change "${target.find}" to "${target.replace}"`, 'info');
+                    return;
+                }
+                if (!newContent.includes(target.replace)) {
+                    addOutput('❌ The required change was not found!', 'error');
+                    addOutput(`💡 Make sure to change it to "${target.replace}"`, 'info');
+                    return;
+                }
+            }
+            
+            // Check for merge conflict resolution
+            if (episode.hasConflict && gameState.nanoFile === episode.conflictFile) {
+                if (newContent.includes('<<<<<<< HEAD') || newContent.includes('=======') || newContent.includes('>>>>>>> main')) {
+                    addOutput('❌ You still have conflict markers in the file!', 'error');
+                    addOutput('💡 Remove the conflict markers (<<<<<<< HEAD, =======, >>>>>>> main) and keep only the content you want', 'info');
+                    return;
+                }
+            }
+            
+            gameState.nanoContent = newContent;
+            gameState.fileContents[gameState.nanoFile] = newContent;
+            
+            document.getElementById('nano-editor').classList.add('hidden');
+            
+            addOutput(`File ${gameState.nanoFile} saved successfully!`, 'success');
+            
+            // For episode 3, mark the nano step as complete
+            if (episode.steps.includes('nano') && gameState.currentStep === 0) {
+                gameState.currentStep = 1;
+                updateProgress();
+                addOutput('🎉 Perfect! Now add the modified file to staging.', 'success');
+                addOutput('💡 Try: git add config.json', 'info');
+                
+                // Update file status to show it's modified
+                updateRepoStatus();
+            }
+            
+            // For merge conflicts, mark file as ready to stage
+            if (episode.hasConflict && gameState.nanoFile === episode.conflictFile) {
+                addOutput('✅ Merge conflict resolved! Now add the file and commit to complete the merge.', 'success');
+                addOutput('💡 Try: git add index.html', 'info');
+            }
+            
+            gameState.inNano = false;
+            gameState.nanoFile = '';
+        }
+
+        function handleGitBranch(parts) {
+            if (parts.length === 2) {
+                // List branches
+                addOutput('Branches:', 'info');
+                gameState.branches.forEach(branch => {
+                    const marker = branch === gameState.currentBranch ? '* ' : '  ';
+                    const color = branch === gameState.currentBranch ? 'success' : 'info';
+                    addOutput(`${marker}${branch}`, color);
+                });
+                return;
+            }
+            
+            if (parts.length >= 3) {
+                const branchName = parts[2];
+                if (gameState.branches.includes(branchName)) {
+                    addOutput(`fatal: A branch named '${branchName}' already exists.`, 'error');
+                    return;
+                }
+                
+                gameState.branches.push(branchName);
+                addOutput(`Created branch '${branchName}'`, 'success');
+                
+                const episode = episodes[currentEpisode];
+                if (episode.steps.includes('branch') && gameState.currentStep === 0 && branchName === 'user-profiles') {
+                    gameState.currentStep = 1;
+                    updateProgress();
+                    addOutput('🎉 Great! Now switch to your new branch.', 'success');
+                    addOutput('💡 Try: git checkout user-profiles', 'info');
+                }
+            }
+        }
+
+        function handleGitCheckout(parts) {
+            if (parts.length < 3) {
+                addOutput('usage: git checkout <branch>', 'error');
+                return;
+            }
+            
+            const branchName = parts[2];
+            if (!gameState.branches.includes(branchName)) {
+                addOutput(`error: pathspec '${branchName}' did not match any file(s) known to git.`, 'error');
+                return;
+            }
+            
+            const previousBranch = gameState.currentBranch;
+            gameState.currentBranch = branchName;
+            addOutput(`Switched to branch '${branchName}'`, 'success');
+            updateBranchDisplay();
+            
+            const episode = episodes[currentEpisode];
+            
+            // Episode 4 logic - switching to feature branch
+            if (episode.steps.includes('checkout') && gameState.currentStep === 1 && branchName === 'user-profiles') {
+                gameState.currentStep = 2;
+                updateProgress();
+                addOutput('🎉 Perfect! Now you\'re on your feature branch. Add and commit your changes.', 'success');
+                addOutput('💡 Add both files: git add user-profile.html profile-styles.css', 'info');
+            }
+            
+            // Episode 5 logic - switching back to main
+            if (episode.steps.includes('checkout') && gameState.currentStep === 0 && branchName === 'main') {
+                gameState.currentStep = 1;
+                updateProgress();
+                addOutput('🎉 Back on main branch! Now merge your feature branch.', 'success');
+                addOutput('💡 Try: git merge user-profiles', 'info');
+            }
+        }
+
+        function handleGitMerge(parts) {
+            if (parts.length < 3) {
+                addOutput('usage: git merge <branch>', 'error');
+                return;
+            }
+            
+            const branchName = parts[2];
+            if (!gameState.branches.includes(branchName)) {
+                addOutput(`merge: ${branchName} - not something we can merge`, 'error');
+                return;
+            }
+            
+            if (branchName === gameState.currentBranch) {
+                addOutput(`Already on '${branchName}'`, 'info');
+                return;
+            }
+            
+            const episode = episodes[currentEpisode];
+            
+            // Check for merge conflicts (Episode 6)
+            if (episode.hasConflict && episode.steps.includes('merge')) {
+                addOutput(`Auto-merging ${episode.conflictFile}`, 'warning');
+                addOutput(`CONFLICT (content): Merge conflict in ${episode.conflictFile}`, 'error');
+                addOutput('Automatic merge failed; fix conflicts and then commit the result.', 'error');
+                addOutput('💡 Use nano to edit the conflicted file and resolve the conflict!', 'info');
+                addOutput(`💡 Try: nano ${episode.conflictFile}`, 'info');
+                gameState.mergeInProgress = true;
+                
+                if (gameState.currentStep === 0) {
+                    gameState.currentStep = 1;
+                    updateProgress();
+                }
+                return;
+            }
+            
+            // Successful merge (Episode 5)
+            addOutput(`Auto-merging user-profile.html`, 'info');
+            addOutput(`Auto-merging profile-styles.css`, 'info');
+            addOutput(`Merge made by the 'recursive' strategy.`, 'success');
+            addOutput(`2 files changed, 15 insertions(+), 0 deletions(-)`, 'info');
+            addOutput(`create mode 100644 user-profile.html`, 'info');
+            addOutput(`create mode 100644 profile-styles.css`, 'info');
+            
+            // Mark files as committed after successful merge
+            gameState.committedFiles = [...episode.files];
+            gameState.stagedFiles = [];
+            
+            if (episode.steps.includes('merge') && gameState.currentStep === 1) {
+                gameState.currentStep = 2;
+                updateProgress();
+                addOutput('🎉 Excellent merge! Now push the updated main branch.', 'success');
+                addOutput('💡 Try: git push', 'info');
+            }
+            
+            updateRepoStatus();
+        }
+
+        function handleGitHelp() {
+            const episode = episodes[currentEpisode];
+            addOutput('Available commands in this episode:', 'info');
+            
+            if (episode.steps.includes('nano')) addOutput('  nano [file]   - Edit file with nano text editor', 'info');
+            addOutput('  git status    - Show the working tree status', 'info');
+            if (episode.steps.includes('add')) addOutput('  git add       - Add file contents to the index', 'info');
+            if (episode.steps.includes('commit')) addOutput('  git commit    - Record changes to the repository', 'info');
+            if (episode.steps.includes('push')) addOutput('  git push      - Update remote refs along with associated objects', 'info');
+            if (episode.steps.includes('branch')) addOutput('  git branch    - List, create, or delete branches', 'info');
+            if (episode.steps.includes('checkout')) addOutput('  git checkout  - Switch branches or restore files', 'info');
+            if (episode.steps.includes('merge')) addOutput('  git merge     - Join two or more development histories', 'info');
+            addOutput('  git help      - Show this help message', 'info');
+            addOutput('', '');
+            addOutput('💡 Type "help" (without git) for a complete command reference', 'info');
+        }
+
+        function showGeneralHelp() {
+            addOutput('📚 GIT GOOD - Complete Command Reference', 'info');
+            addOutput('==========================================', 'info');
+            addOutput('', '');
+            
+            addOutput('🌐 GENERAL COMMANDS:', 'success');
+            addOutput('  help          - Show this complete help reference', 'info');
+            addOutput('', '');
+            
+            addOutput('📝 FILE EDITING:', 'success');
+            addOutput('  nano [file]   - Open file in nano text editor', 'info');
+            addOutput('', '');
+            
+            addOutput('🔍 GIT INSPECTION:', 'success');
+            addOutput('  git status    - Show working tree status and staged changes', 'info');
+            addOutput('  git help      - Show episode-specific Git help', 'info');
+            addOutput('', '');
+            
+            addOutput('📦 GIT STAGING:', 'success');
+            addOutput('  git add [file] - Stage files for commit (use . for all files)', 'info');
+            addOutput('', '');
+            
+            addOutput('💾 GIT COMMITTING:', 'success');
+            addOutput('  git commit -m "message" - Commit staged changes with message', 'info');
+            addOutput('', '');
+            
+            addOutput('🚀 GIT PUSHING:', 'success');
+            addOutput('  git push      - Push committed changes to remote repository', 'info');
+            addOutput('', '');
+            
+            addOutput('🌿 GIT BRANCHING:', 'success');
+            addOutput('  git branch    - List all branches (* = current branch)', 'info');
+            addOutput('  git branch [name] - Create new branch', 'info');
+            addOutput('  git checkout [branch] - Switch to different branch', 'info');
+            addOutput('', '');
+            
+            addOutput('🔀 GIT MERGING:', 'success');
+            addOutput('  git merge [branch] - Merge branch into current branch', 'info');
+            addOutput('', '');
+            
+            addOutput('💡 TIPS:', 'warning');
+            addOutput('  • Use quotes around commit messages: git commit -m "Fix bug"', 'info');
+            addOutput('  • Add multiple files: git add file1 file2 file3', 'info');
+            addOutput('  • Check status anytime with: git status', 'info');
+            addOutput('  • Get episode-specific help: git help', 'info');
+            addOutput('', '');
+            addOutput('🎮 Happy coding! Type any command to get started.', 'success');
+        }
+
+        function updateBranchDisplay() {
+            document.getElementById('current-branch').textContent = gameState.currentBranch;
+        }
+
+        function completeEpisode() {
+            addOutput('', '');
+            addOutput('🎉🎉🎉 EPISODE COMPLETE! 🎉🎉🎉', 'success');
+            addOutput('', '');
+            
+            // Episode-specific completion messages
+            if (currentEpisode === 1) {
+                addOutput('Sarah rushes back to your desk with a huge smile:', 'info');
+                addOutput('"Amazing work! The website is back online and customers can sign up again.', 'success');
+                addOutput('You saved the day on your very first day! Welcome to the team!" 🎊', 'success');
+                addOutput('', '');
+                addOutput('You\'ve mastered the basic Git workflow: add → commit → push', 'info');
+            } else if (currentEpisode === 2) {
+                addOutput('The UI/UX team sends you a celebratory message:', 'info');
+                addOutput('"You\'re a Git wizard! The navigation system is now live! 🎉"', 'success');
+                addOutput('', '');
+                addOutput('You\'ve learned to handle multiple files in a single commit!', 'info');
+            } else if (currentEpisode === 3) {
+                addOutput('DevOps sends you a high-five emoji:', 'info');
+                addOutput('"Server config updated successfully! Crisis averted! 🚀"', 'success');
+                addOutput('', '');
+                addOutput('You\'ve mastered file editing with nano and Git!', 'info');
+            } else if (currentEpisode === 4) {
+                addOutput('Sarah is impressed with your branching skills:', 'info');
+                addOutput('"Feature branches! You\'re thinking like a senior developer now! 🌟"', 'success');
+                addOutput('', '');
+                addOutput('You\'ve learned professional Git branching workflows!', 'info');
+            } else if (currentEpisode === 5) {
+                addOutput('The team celebrates the successful merge:', 'info');
+                addOutput('"User profiles are now live on production! Amazing work! 🎊"', 'success');
+                addOutput('', '');
+                addOutput('You\'ve mastered the complete feature development cycle!', 'info');
+            } else if (currentEpisode === 6) {
+                addOutput('Merge conflict resolved successfully!', 'info');
+                addOutput('"You handled that conflict like a pro! 🚀"', 'success');
+                addOutput('', '');
+                addOutput('You\'ve conquered the ultimate Git challenge!', 'info');
+            }
+            
+            addOutput('', '');
+            addOutput('Ready for the next challenge?', 'info');
+            
+            // Mark episode as completed
+            if (!gameState.completedEpisodes.includes(currentEpisode)) {
+                gameState.completedEpisodes.push(currentEpisode);
+            }
+            
+            document.getElementById('next-button').classList.remove('hidden');
+        }
+
+        function generateCommitHash() {
+            return Math.random().toString(36).substr(2, 7);
+        }
+
+        function showHint() {
+            const episode = episodes[currentEpisode];
+            const hintDiv = document.getElementById('hint-content');
+            
+            // Episode-specific hints
+            let hintHTML = '';
+            if (currentEpisode === 1) {
+                hintHTML = '<p><strong>💡 Hint:</strong> Remember the basic Git workflow:</p><ol><li><code>git add [filename]</code> - Stage your changes</li><li><code>git commit -m "message"</code> - Commit with a descriptive message</li><li><code>git push</code> - Push to the remote repository</li></ol><p>The file you need to add is <code>signup-form.html</code></p>';
+            } else if (currentEpisode === 2) {
+                hintHTML = '<p><strong>💡 Hint:</strong> You need to handle multiple files this time:</p><ol><li><code>git add navigation.html styles.css script.js</code> - Stage all three files at once</li><li><code>git commit -m "Add new navigation system"</code> - Commit them together</li><li><code>git push</code> - Push to the repository</li></ol><p>You can add multiple files with one command!</p>';
+            } else if (currentEpisode === 3) {
+                hintHTML = '<p><strong>💡 Hint:</strong> You need to edit the file first:</p><ol><li><code>nano config.json</code> - Open the file in nano editor</li><li>Change <code>api-v1.MacroHard.com</code> to <code>api-v2.MacroHard.com</code></li><li>Save and exit nano (Ctrl+X, then Y, then Enter)</li><li><code>git add config.json</code> - Stage the modified file</li><li><code>git commit -m "Update API endpoint to v2"</code> - Commit your changes</li><li><code>git push</code> - Push to the repository</li></ol>';
+            } else if (currentEpisode === 4) {
+                hintHTML = '<p><strong>💡 Hint:</strong> You\'re working with feature branches:</p><ol><li><code>git branch user-profiles</code> - Create a new branch</li><li><code>git checkout user-profiles</code> - Switch to your new branch</li><li><code>git add user-profile.html profile-styles.css</code> - Stage your feature files</li><li><code>git commit -m "Add user profile system"</code> - Commit your feature</li><li><code>git push</code> - Push your new branch</li></ol><p>Branches let you work safely without affecting the main code!</p>';
+            } else if (currentEpisode === 5) {
+                hintHTML = '<p><strong>💡 Hint:</strong> Time to merge your feature back to main:</p><ol><li><code>git checkout main</code> - Switch back to the main branch</li><li><code>git merge user-profiles</code> - Merge your feature branch into main</li><li><code>git push</code> - Push the updated main branch</li></ol><p>This combines your feature work with the stable main code!</p>';
+            } else if (currentEpisode === 6) {
+                hintHTML = '<p><strong>💡 Hint:</strong> You have a merge conflict to resolve:</p><ol><li><code>git merge main</code> - This will create a conflict</li><li><code>nano index.html</code> - Open the conflicted file</li><li>Remove the conflict markers (<<<<<<< HEAD, =======, >>>>>>> main)</li><li>Keep the content you want and save the file</li><li><code>git add index.html</code> - Stage the resolved file</li><li><code>git commit -m "Resolve merge conflict"</code> - Complete the merge</li><li><code>git push</code> - Push the resolved merge</li></ol><p>Merge conflicts happen when Git can\'t automatically combine changes!</p>';
+            }
+            
+            hintDiv.innerHTML = hintHTML;
+            hintDiv.classList.remove('hidden');
+            document.getElementById('hint-button').disabled = true;
+            document.getElementById('hint-button').textContent = '💡 Hint Revealed';
+            gameState.hintUsed = true;
+        }
+
+        function nextEpisode() {
+            if (currentEpisode < Object.keys(episodes).length) {
+                currentEpisode++;
+                loadEpisode(currentEpisode);
+            } else {
+                // All episodes completed
+                addOutput('🎊🎊🎊 CONGRATULATIONS! 🎊🎊🎊', 'success');
+                addOutput('', '');
+                addOutput('You\'ve completed all available episodes!', 'success');
+                addOutput('You are now a Git master! 🚀', 'success');
+                addOutput('', '');
+                addOutput('Skills you\'ve mastered:', 'info');
+                addOutput('✅ Basic Git workflow (add, commit, push)', 'success');
+                addOutput('✅ File editing with nano', 'success');
+                addOutput('✅ Feature branching', 'success');
+                addOutput('✅ Merging branches', 'success');
+                addOutput('✅ Resolving merge conflicts', 'success');
+                addOutput('', '');
+                addOutput('More episodes coming soon...', 'info');
+                
+                // Hide the next button since there are no more episodes
+                document.getElementById('next-button').classList.add('hidden');
+            }
+        }
+
+        function loadEpisode(episodeNum) {
+            const episode = episodes[episodeNum];
+            
+            // Reset game state completely
+            gameState = {
+                stagedFiles: [],
+                committedFiles: [],
+                pushedFiles: [],
+                currentStep: 0,
+                hintUsed: false,
+                currentBranch: episode.currentBranch || 'main',
+                branches: episode.branches || ['main'],
+                fileContents: episode.fileContents || {},
+                inNano: false,
+                nanoFile: '',
+                nanoContent: '',
+                mergeInProgress: false,
+                completedEpisodes: gameState.completedEpisodes || []
+            };
+            
+            // Special handling for episode 5 - ensure user-profiles branch exists
+            if (episodeNum === 5 && !gameState.branches.includes('user-profiles')) {
+                gameState.branches.push('user-profiles');
+            }
+            
+            // Update UI
+            document.getElementById('episode-title').textContent = episode.title;
+            document.getElementById('objective-text').textContent = episode.objective;
+            document.getElementById('hint-button').disabled = false;
+            document.getElementById('hint-button').textContent = '💡 Need a Hint?';
+            document.getElementById('hint-content').classList.add('hidden');
+            document.getElementById('next-button').classList.add('hidden');
+            
+            // Update story content
+            if (episode.story) {
+                document.getElementById('story-content').innerHTML = episode.story;
+            }
+            
+            // Update branch display
+            updateBranchDisplay();
+            updateProgress();
+            updateRepoStatus();
+            
+            // Clear terminal
+            document.getElementById('terminal-output').innerHTML = '<div class="output-line info">📂 Loaded ' + episode.title + '</div><div class="output-line">Ready for your next Git adventure!</div><div class="output-line">&nbsp;</div>';
+            
+            // Hide nano editor if it was open
+            document.getElementById('nano-editor').classList.add('hidden');
+        }
+
+        // Initialize the game
+        updateRepoStatus();
+        updateProgress();
+
+        // Focus on input and ensure event listener is attached
+        const commandInput = document.getElementById('command-input');
+        if (commandInput) {
+            commandInput.focus();
+            // Ensure the event listener is properly attached
+            commandInput.addEventListener('keypress', handleCommand);
+        }
+    </script>
+</body>
+</html>
