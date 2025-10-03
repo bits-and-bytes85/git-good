@@ -1,1 +1,1 @@
-GitGood is a fun game to practice Git commands in simulated scenarios!
+GitGood is a story-basedgame to practice Git commands in simulated scenarios!
